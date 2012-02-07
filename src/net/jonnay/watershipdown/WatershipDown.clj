@@ -10,7 +10,6 @@
 ;//#^{Stateless {}} is a @Stateless annotation
 
 (set! *warn-on-reflection* true)
-(set! *use-context-classloader* false)
 
 (defn debug-to-mc-log [^String msg]
   (let [logger (Bukkit/getLogger)]

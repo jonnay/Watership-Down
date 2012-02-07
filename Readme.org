@@ -3,7 +3,58 @@
   track the stats of your players, and grant achievements based on those stats.
 
 * Classloader woes
+
+  What is there (which isn't much, mind you) is currently compileable through lein, bundles up a plugin.yml, and sets the classpath in the
+  manifest to a shared clojure lib in ../server/lib/.  This is great, but there is a slight problem:
+
+#+begin_example
+09:10:17 [SEVERE] Could not load 'plugins/watershipdown-0.1.jar' in folder 'plugins': 
+java.lang.ExceptionInInitializerError
+	at clojure.lang.Namespace.<init>(Namespace.java:34)
+	at clojure.lang.Namespace.findOrCreate(Namespace.java:176)
+	at clojure.lang.Var.internPrivate(Var.java:149)
+	at net.jonnay.watershipdown.WatershipDown.<clinit>(Unknown Source)
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:247)
+	at org.bukkit.plugin.java.JavaPluginLoader.loadPlugin(JavaPluginLoader.java:131)
+	at org.bukkit.plugin.SimplePluginManager.loadPlugin(SimplePluginManager.java:285)
+	at org.bukkit.plugin.SimplePluginManager.loadPlugins(SimplePluginManager.java:200)
+	at org.bukkit.craftbukkit.CraftServer.loadPlugins(CraftServer.java:156)
+	at org.bukkit.craftbukkit.CraftServer.<init>(CraftServer.java:132)
+	at net.minecraft.server.ServerConfigurationManager.<init>(ServerConfigurationManager.java:52)
+	at net.minecraft.server.MinecraftServer.init(MinecraftServer.java:148)
+	at net.minecraft.server.MinecraftServer.run(MinecraftServer.java:407)
+	at net.minecraft.server.ThreadServerApplication.run(SourceFile:465)
+Caused by: java.lang.RuntimeException: java.io.FileNotFoundException: Could not locate clojure/core__init.class or clojure/core.clj on classpath: 
+	at clojure.lang.Util.runtimeException(Util.java:165)
+	at clojure.lang.RT.<clinit>(RT.java:319)
+	... 15 more
+Caused by: java.io.FileNotFoundException: Could not locate clojure/core__init.class or clojure/core.clj on classpath: 
+	at clojure.lang.RT.load(RT.java:430)
+	at clojure.lang.RT.load(RT.java:398)
+	at clojure.lang.RT.doInit(RT.java:434)
+	at clojure.lang.RT.<clinit>(RT.java:316)
+	... 15 more
+#+end_example
+  
+  From what I can glean, this has to do with the class loader.  One option is to bundle a version of clojure with *use-context-classloader*
+  set to false, which may work.  (But involves building my own clojure.)  Another option might be to look into the JavaPlugin class, and
+  over-ride its behavior, especially with regards to the Java Plugin Loader.
+  ( http://jd.bukkit.org/doxygen/d1/ddb/JavaPluginLoader_8java_source.html )  Not sure about that however.
+
+  Yet anotehr option involves using a Java delegate to load the clojure directly (but then, what is the point of compiling to java?)
+  Like here http://johnsanda.blogspot.com/2010/11/writing-rhq-plugin-in-clojure.html or even here, which runs clojure through a reader and the evaluator:
   https://groups.google.com/group/clojure/browse_thread/thread/f0c69735c5a9bd03/1e0dced366af9077?lnk=gst&q=webstart&fwc=1&hl=en
+
+  From the Jira ticket here: http://dev.clojure.org/jira/browse/CLJ-260 it looks like we can set the context classloader inside of a
+  subclass of javaplugin (probably called ClojurePlugin, funnily enough).  This may have some serious implications with the bukkit
+  classloader however.
+
+#+begin_example
+Thread.currentThread().setContextClassLoader(loader);
+#+end_example
+  
+
 
 * Features, that are coming soon!
   - Stats are recorded based on typical bukkit events
