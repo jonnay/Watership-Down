@@ -1,0 +1,13 @@
+* Watership Down
+  Watership Down is an example of a Bukkit plugin written in Clojure.  It is also endeavoring to be fully functional plugin that lets you
+  track the stats of your players, and grant achievements based on those stats.
+
+* Classloader woes
+  https://groups.google.com/group/clojure/browse_thread/thread/f0c69735c5a9bd03/1e0dced366af9077?lnk=gst&q=webstart&fwc=1&hl=en
+
+* Features, that are coming soon!
+  - Stats are recorded based on typical bukkit events
+  - When an achievement is earned, an event is posted!
+  - If Spout is active, even more events are listened to
+  - Uses a SqLite Database, and maybe MySQL too!
+  - Dynamic Event listening, if I can make it go!
